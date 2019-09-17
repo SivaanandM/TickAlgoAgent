@@ -1,0 +1,7 @@
+# Don't track content of these folders
+tickbank/
+*/__pycache__/
+.idea
+.DS_Store
+hrhdbot-firebase-adminsdk-8z5q4-11bff65f7c.json
+
