@@ -1,5 +1,5 @@
 import sys,os
-sys.path.append(os.getenv('TICKALGOAGENT'))
+sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 from src.pandaframe import fast_indicators as indi_obj
 import traceback

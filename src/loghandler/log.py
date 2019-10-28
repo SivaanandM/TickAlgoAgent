@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-sys.path.append(os.getenv('TICKALGOAGENT'))
+sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import shutil
 import traceback
 from src.main.algo_agent_object import AlgoAgentObjects as agentObj

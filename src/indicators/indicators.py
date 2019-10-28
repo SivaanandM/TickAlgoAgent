@@ -1,5 +1,5 @@
 import sys,os
-sys.path.append(os.getenv('TICKALGOAGENT'))
+sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import traceback
 from src.loghandler import log
 from concurrent.futures import ThreadPoolExecutor

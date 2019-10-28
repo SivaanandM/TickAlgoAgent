@@ -1,5 +1,5 @@
 import sys,os
-sys.path.append(os.getenv('TICKALGOAGENT'))
+sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.algos.sapm_objects import SapmObjects as so
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 import time, traceback, datetime
@@ -7,13 +7,12 @@ import time, traceback, datetime
 from src.loghandler import log
 logger = log.setup_custom_logger('root')
 
-entime = datetime.datetime.strptime(abObj.parser.get('common', 'back_test_date')+' 09:20:00', '%Y%m%d %H:%M:%S')
+entime = datetime.datetime.strptime(abObj.market_date+' 09:20:00', '%Y%m%d %H:%M:%S')
 ent930am = time.mktime(entime.timetuple())
-extime = datetime.datetime.strptime(abObj.parser.get('common', 'back_test_date')+' 15:15:00', '%Y%m%d %H:%M:%S')
+extime = datetime.datetime.strptime(abObj.market_date+' 15:15:00', '%Y%m%d %H:%M:%S')
 exit320pm = time.mktime(extime.timetuple())
 
 class Sapm():
-
     def do_samp(self, ticks):
         if abObj.start_sapm is True:
             self.algo(ticks.get('Timestamp'), ticks.get('Price'))
