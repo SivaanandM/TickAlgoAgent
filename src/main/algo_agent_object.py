@@ -10,13 +10,17 @@ class AlgoAgentObjects:
     parser = ConfigParser()
     os.environ['TICKALGOAGENT_CONFIG'] = os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")]+'/config/config.ini'
     parser.read(os.getenv("TICKALGOAGENT_CONFIG"))
-    indicator_thread = None
-    hrhd_thread = None
-    sapm_thread = None
+    # indicator_thread = None
+    # hrhd_thread = None
+    # sapm_thread = None
     start_sapm = True
+    # All this below variable got assigned by main method through cmd line arguments
+    topic = ""
+    kafka = ""
+    symbol = ""
+    market_date = ""
+    prev_market_date = ""
 
-    market_date = "20191023"
-    prev_market_date = "20191022"
     # all below used in fast min data frame
     fast_min_ticks = []
     fast_min = int(parser.get('dataframes', 'fast_df'))

@@ -7,24 +7,22 @@ from src.pandaframe.slow_df import SlowDF as SLDF
 from src.pandaframe.fast_df import FastDF as FADF
 from src.algos.sapm import Sapm as Sapm
 
-logger = log.setup_custom_logger('root')
+logger = log.setup_custom_logger('AlgoAgent')
 
-sapm_obj_one = Sapm()
 
 
 class Indicators(object):
+    sapm_obj_one = None
 
     def __init__(self):
-        pass
+        self.sapm_obj_one = Sapm()
 
-    @staticmethod
-    def data_frame(ticks):
+    def data_frame(self, ticks):
         SLDF.generate_slow_min_df(ticks)
         FADF.generate_fast_min_df(ticks)
 
-    @staticmethod
-    def exe_sapm(ticks):
-        sapm_obj_one.do_samp(ticks)
+    def exe_sapm(self, ticks):
+        self.sapm_obj_one.do_samp(ticks)
 
     def algo(self, ticks):
         try:

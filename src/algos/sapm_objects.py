@@ -4,7 +4,8 @@ from src.main.algo_agent_object import AlgoAgentObjects as abObj
 
 
 class SapmObjects():
-    SYMBOL = abObj.parser.get('common', 'back_test_symbol')
+
+    SYMBOL = abObj.symbol
     TI = int(abObj.parser.get('sapm', 'TI'))
     DTH = float(abObj.parser.get('sapm', 'DTH'))
     TSL = 0.0 #float(abObj.parser.get('sapm', 'TSL'))

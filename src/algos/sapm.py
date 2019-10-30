@@ -7,15 +7,21 @@ import time, traceback, datetime
 from src.loghandler import log
 logger = log.setup_custom_logger('root')
 
-entime = datetime.datetime.strptime(abObj.market_date+' 09:20:00', '%Y%m%d %H:%M:%S')
-ent930am = time.mktime(entime.timetuple())
-extime = datetime.datetime.strptime(abObj.market_date+' 15:15:00', '%Y%m%d %H:%M:%S')
-exit320pm = time.mktime(extime.timetuple())
+class Sapm(object):
+    entime=None
+    ent930am=None
+    extime=None
+    exit320pm=None
 
-class Sapm():
+    def __init__(self):
+        self.entime = datetime.datetime.strptime(abObj.market_date + ' 09:20:00', '%Y%m%d %H:%M:%S')
+        self.ent930am = time.mktime(self.entime.timetuple())
+        self.extime = datetime.datetime.strptime(abObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
+        self.exit320pm = time.mktime(self.extime.timetuple())
+
     def do_samp(self, ticks):
         if abObj.start_sapm is True:
-            self.algo(ticks.get('Timestamp'), ticks.get('Price'))
+            self.algo(float(ticks.get('Timestamp')), float(ticks.get('Price')))
             if so.SL == 0.0:
                 so.SL = round(ticks.get('Price') * (float(abObj.parser.get('sapm', 'SL')) / 100), 1)
                 so.TSL = round(ticks.get('Price') * (float(abObj.parser.get('sapm', 'TSL')) / 100), 1)
@@ -23,7 +29,7 @@ class Sapm():
 
     def algo(self, ticktime, tickprice):
         try:
-            if ticktime > exit320pm:
+            if ticktime > self.exit320pm:
                 if so.LBuy_Position is True:
                     print("*** LONG EXIT ," + str(
                         time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(tickprice))
@@ -77,7 +83,7 @@ class Sapm():
                     print("NET :" + str(sum(so.net_profit)))
                     print("Number of TRADES :" + str(so.No_Trades))
 
-            if (ticktime < exit320pm) and (ticktime > ent930am):
+            if (ticktime < self.exit320pm) and (ticktime > self.ent930am):
                 if len(so.titicks) > 0:
                     if (float(ticktime) - float(so.titicks[0][0])) >= so.TI:
                         so.titicks.append([ticktime, tickprice])
@@ -126,7 +132,8 @@ class Sapm():
                 else:
                     so.titicks.append([ticktime, tickprice])
 
-        except:
+        except Exception as ex:
+            print(str(ex))
             logger.error(traceback.format_exc())
 
 

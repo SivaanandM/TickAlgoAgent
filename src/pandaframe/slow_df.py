@@ -7,7 +7,7 @@ import traceback
 import time
 import pandas as pd
 
-logger = log.setup_custom_logger('root')
+logger = log.setup_custom_logger('AlgoAgent')
 
 
 class SlowDF(object):

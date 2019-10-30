@@ -7,7 +7,7 @@ import traceback
 import math
 
 # Init Logging Facilities
-logger = log.setup_custom_logger('root')
+logger = log.setup_custom_logger('AlgoAgent')
 
 
 def load_indicators():
