@@ -89,13 +89,13 @@ def cmd_param_handlers():
         cmdLineParser.add_argument("-k", "--kafka", action="store", type=str, dest="kafka",
                                    default="127.0.0.1:9092", help="Kafka server IP eg: 127.0.0.1:9092")
         cmdLineParser.add_argument("-t", "--topic", action="store", type=str, dest="topic",
-                                   default="HRHDS", help="Kafka Producer Topic Name eg: 0")
+                                   default="ADANIPORT", help="Kafka Producer Topic Name eg: 0")
         cmdLineParser.add_argument("-md", "--marketdate", action="store", type=str, dest="marketdate",
-                                   default="", help="Market Date eg: 20191025")
+                                   default="20191031", help="Market Date eg: 20191025")
         cmdLineParser.add_argument("-pd", "--prevdate", action="store", type=str, dest="prevdate",
-                                   default="", help="Previous Market date eg: 20191025")
+                                   default="20191030", help="Previous Market date eg: 20191025")
         cmdLineParser.add_argument("-s", "--symbol", action="store", type=str, dest="symbol",
-                                   default="", help="IB Symbol eg: INFY")
+                                   default="ADANIPORT", help="IB Symbol eg: INFY")
         args = cmdLineParser.parse_args()
 
         consObj = ConsumerAgent(args_topic=str(args.topic),
@@ -114,13 +114,14 @@ def cmd_param_handlers():
 
 if __name__ == '__main__':
     logger.info("** Algo Agent Initiated Succesfully")
-    consobj = ConsumerAgent(
-        args_topic=str("HRHD"),
-        args_kafkadetails=str("127.0.0.1:9092"),
-        args_symbol=str("TCS"),
-        args_marketdate=str("20191030"),
-        arg_prevdate=str("20191029")
-    )
-    logger.info("Base parameters initialized")
+    cmd_param_handlers()
+    # consobj = ConsumerAgent(
+    #     args_topic=str("HRHD"),
+    #     args_kafkadetails=str("127.0.0.1:9092"),
+    #     args_symbol=str("TCS"),
+    #     args_marketdate=str("20191030"),
+    #     arg_prevdate=str("20191029")
+    # )
+    # logger.info("Base parameters initialized")
     consobj.startAgentEngine()
 
