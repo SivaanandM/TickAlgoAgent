@@ -1,5 +1,6 @@
 # Don't track content of these folders
 tickbank/
+.vscode
 venv_algoagent/
 */__pycache__/
 __pycache__/
