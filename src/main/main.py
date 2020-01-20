@@ -1,4 +1,8 @@
-import ast
+import os
+import datetime
+import time
+os.environ['TZ'] = 'Asia/Kolkata'
+time.tzset()
 import os
 import traceback
 import argparse
@@ -7,7 +11,7 @@ import pandas as pd
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from kafka import KafkaConsumer
 from json import loads
-import threading
+import pandas as pd
 from src.loghandler import log
 from src.main.algo_agent_object import AlgoAgentObjects as agentObj
 from src.commonlib.firebase_utils import FireBaseUtils
@@ -22,6 +26,9 @@ class ConsumerAgent(object):
 
     ohlc_consumer = None
     indicator_obj = None
+    exit_algo = None
+    exit_algo_315pm = None
+    tick_df = None
 
     def __init__(self, args_topic, args_kafkadetails, args_symbol, args_marketdate, arg_prevdate):
         agentObj.topic = args_topic
@@ -29,6 +36,9 @@ class ConsumerAgent(object):
         agentObj.market_date = args_marketdate
         agentObj.symbol = args_symbol
         agentObj.prev_market_date = arg_prevdate
+        self.exit_algo = datetime.datetime.strptime(agentObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
+        self.exit_algo_315pm = time.mktime(self.exit_algo.timetuple())
+        self.tick_df = pd.DataFrame(None, columns=['Timestamp', 'Price'])
         self.ohlc_consumer = KafkaConsumer(str(agentObj.topic),
                       bootstrap_servers=[str(agentObj.kafka)],
                       auto_offset_reset='earliest',
@@ -36,13 +46,31 @@ class ConsumerAgent(object):
                       group_id='agent',
                       value_deserializer=lambda x: loads(x.decode('utf-8')))
 
+    def export_dataframe(self, message):
+        try:
+            if not os.path.exists(os.path.join("/tmp", agentObj.market_date)):
+                os.makedirs(os.path.join("/tmp", agentObj.market_date))
+            dfs_path = os.path.join("/tmp", agentObj.market_date)
+            agentObj.fast_min_pd_DF.to_csv(os.path.join(dfs_path, agentObj.symbol+"_fast_data_frames.csv"), header=True)
+            agentObj.slow_min_pd_DF.to_csv(os.path.join(dfs_path, agentObj.symbol+"_slow_data_frames.csv"), header=True)
+            self.tick_df.to_csv(os.path.join(dfs_path, agentObj.symbol + "_ticks.csv"), header=True)
+            sys.exit()
+        except Exception as ex:
+            logger.error(traceback.format_exc())
+            sys.exit()
+
     def startlisten(self):
         indicator_obj = Indicators()
-        logger.info("Algo Agent Strated Listening ticks for "+ agentObj.symbol +", Topic Id:"+agentObj.topic)
+        logger.info("Algo Agent Strated Listening ticks for " + agentObj.symbol + ", Topic Id:"+agentObj.topic)
         try:
             for message in self.ohlc_consumer:
                 message = message.value
-                indicator_obj.algo(message)
+                if (message.get('Timestamp') is not None) and (message.get('Price') is not None):
+                    self.tick_df.loc[len(self.tick_df)] = [message.get('Timestamp'), message.get('Price')]
+                    if float(message.get('Timestamp')) < self.exit_algo_315pm:
+                        indicator_obj.algo(message)
+                    else:
+                        self.export_dataframe(message)
         except Exception as ex:
             logger.error(traceback.format_exc())
 
@@ -65,8 +93,10 @@ class ConsumerAgent(object):
             pindi.generate_indicator_serious()
             logger.info("All indicators gensrated sucessfull for previous day data")
             logger.info("**Fast dataframe with indicators")
+            agentObj.fast_min_pd_DF = agentObj.fast_min_pd_DF[:-1]
             logger.info(agentObj.fast_min_pd_DF)
             logger.info("**Fast dataframe with indicators")
+            agentObj.slow_min_pd_DF = agentObj.slow_min_pd_DF[:-1]
             logger.info(agentObj.slow_min_pd_DF)
 
         except Exception as ex:
@@ -114,14 +144,16 @@ def cmd_param_handlers():
 
 if __name__ == '__main__':
     logger.info("** Algo Agent Initiated Succesfully")
-    cmd_param_handlers()
-    # consobj = ConsumerAgent(
-    #     args_topic=str("HRHD"),
-    #     args_kafkadetails=str("127.0.0.1:9092"),
-    #     args_symbol=str("TCS"),
-    #     args_marketdate=str("20191030"),
-    #     arg_prevdate=str("20191029")
-    # )
-    # logger.info("Base parameters initialized")
+    # cmd_param_handlers()
+
+    # Below commands to execute individually
+    consobj = ConsumerAgent(
+        args_topic=str("HRHD"),
+        args_kafkadetails=str("127.0.0.1:9092"),
+        args_symbol=str("TCS"),
+        args_marketdate=str("20200117"),
+        arg_prevdate=str("20200116")
+    )
+    logger.info("Base parameters initialized")
     consobj.startAgentEngine()
 

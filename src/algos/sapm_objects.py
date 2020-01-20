@@ -29,7 +29,6 @@ class SapmObjects():
 
     TI_SAPM_LONG = 0
     TI_SAPM_SHORT = 0
-
     net_profit = []
 
 

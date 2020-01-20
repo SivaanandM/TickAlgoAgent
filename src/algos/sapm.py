@@ -1,23 +1,30 @@
-import sys,os
+import sys
+import os
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.algos.sapm_objects import SapmObjects as so
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 import time, traceback, datetime
-
+os.environ['TZ'] = 'Asia/Kolkata'
+time.tzset()
 from src.loghandler import log
 logger = log.setup_custom_logger('root')
 
+
 class Sapm(object):
-    entime=None
-    ent930am=None
-    extime=None
-    exit320pm=None
+    entime = None
+    ent930am = None
+    extime = None
+    exit320pm = None
+    exit_algo = None
+    exit_algo_325pm = None
 
     def __init__(self):
         self.entime = datetime.datetime.strptime(abObj.market_date + ' 09:20:00', '%Y%m%d %H:%M:%S')
         self.ent930am = time.mktime(self.entime.timetuple())
-        self.extime = datetime.datetime.strptime(abObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
+        self.extime = datetime.datetime.strptime(abObj.market_date + ' 15:10:00', '%Y%m%d %H:%M:%S')
         self.exit320pm = time.mktime(self.extime.timetuple())
+
+
 
     def do_samp(self, ticks):
         if abObj.start_sapm is True:
@@ -136,7 +143,7 @@ class Sapm(object):
             print(str(ex))
             logger.error(traceback.format_exc())
 
-
+## this is unit test
 if __name__ == '__main__':
     sobj = Sapm()
     testlist = [[1548906300, 165.0], [1548906303, 165.25], [1548906309, 165.15]]

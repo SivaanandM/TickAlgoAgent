@@ -5,6 +5,8 @@ from src.pandaframe import slow_indicators as indi_obj
 from src.loghandler import log
 import traceback
 import time
+os.environ['TZ'] = 'Asia/Kolkata'
+time.tzset()
 import pandas as pd
 
 logger = log.setup_custom_logger('AlgoAgent')
