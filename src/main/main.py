@@ -144,16 +144,16 @@ def cmd_param_handlers():
 
 if __name__ == '__main__':
     logger.info("** Algo Agent Initiated Succesfully")
-    # cmd_param_handlers()
+    cmd_param_handlers()
 
     # Below commands to execute individually
-    consobj = ConsumerAgent(
-        args_topic=str("HRHD"),
-        args_kafkadetails=str("127.0.0.1:9092"),
-        args_symbol=str("TCS"),
-        args_marketdate=str("20200117"),
-        arg_prevdate=str("20200116")
-    )
-    logger.info("Base parameters initialized")
-    consobj.startAgentEngine()
+    # consobj = ConsumerAgent(
+    #     args_topic=str("HRHD"),
+    #     args_kafkadetails=str("127.0.0.1:9092"),
+    #     args_symbol=str("TCS"),
+    #     args_marketdate=str("20200117"),
+    #     arg_prevdate=str("20200116")
+    # )
+    # logger.info("Base parameters initialized")
+    # consobj.startAgentEngine()
 
