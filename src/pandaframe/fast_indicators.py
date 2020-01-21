@@ -204,7 +204,7 @@ def average_directional_movement_index(n, n_ADX):
             except:
                 pass
     except:
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
         logger.error(traceback.format_exc())
 
 

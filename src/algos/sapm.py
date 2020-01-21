@@ -140,7 +140,7 @@ class Sapm(object):
                     so.titicks.append([ticktime, tickprice])
 
         except Exception as ex:
-            print(str(ex))
+            # print(str(ex))
             logger.error(traceback.format_exc())
 
 ## this is unit test

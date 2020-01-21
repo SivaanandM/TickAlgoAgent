@@ -33,7 +33,7 @@ class SlowDF(object):
                     break
                 indi_obj.load_indicators()
             except:
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
                 logger.error(traceback.format_exc())
         tick_time = ticks.get('Timestamp')
         tick_price = ticks.get('Price')
@@ -57,7 +57,7 @@ class SlowDF(object):
                 abObj.slow_min_ticks.append([tick_time, tick_price])
 
         except:
-            print(traceback.format_exc())
+            # print(traceback.format_exc())
             logger.error(traceback.format_exc())
 
 

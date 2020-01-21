@@ -33,7 +33,7 @@ class Indicators(object):
                     executors_list.append(executor.submit(self.exe_sapm(ticks)))
 
         except:
-            print(traceback.format_exc())
+            # print(traceback.format_exc())
             logger.error(traceback.format_exc())
 
 

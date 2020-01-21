@@ -32,7 +32,7 @@ class FastDF(object):
                     break
                 indi_obj.load_indicators()
             except:
-                print(traceback.format_exc())
+                # print(traceback.format_exc())
                 logger.error(traceback.format_exc())
 
         tick_time = ticks.get('Timestamp')
@@ -52,6 +52,6 @@ class FastDF(object):
                 abObj.cur_fast_min = int(str(time.strftime("%M", time.localtime(int(tick_time))))) + abObj.fast_min
                 abObj.fast_min_ticks.append([tick_time, tick_price])
         except:
-            print(traceback.format_exc())
+            # print(traceback.format_exc())
             logger.error(traceback.format_exc())
 
