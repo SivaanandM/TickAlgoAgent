@@ -1,14 +1,15 @@
-import sys,os
+import os
+import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
-from src.loghandler import log
+# from src.loghandler import log
 import pandas as pd
 import traceback
 import math
 
 # Init Logging Facilities
-logger = log.setup_custom_logger('AlgoAgent')
-
+# logger = abObj.log
 
 def load_indicators():
     try:
@@ -27,7 +28,7 @@ def load_indicators():
         if abObj.start_sapm is True:
             flag_it()
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def flag_it():
@@ -97,7 +98,7 @@ def flag_it():
         # print("*S",abObj.fast_min_shot_flags)
 
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def moving_average(n):
@@ -108,7 +109,7 @@ def moving_average(n):
         else:
             abObj.fast_min_pd_DF._set_value(MA.tail(1).index, 'MA', MA.tail(1)[0])
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def exponential_moving_average(n):
@@ -119,7 +120,7 @@ def exponential_moving_average(n):
         else:
             abObj.fast_min_pd_DF._set_value(EMA.tail(1).index, 'EMA', EMA.tail(1)[0])
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def macd(n_fast, n_slow):
@@ -144,7 +145,7 @@ def macd(n_fast, n_slow):
         else:
             abObj.fast_min_pd_DF._set_value(MACDdiff.tail(1).index, 'MACDdiff', MACDdiff.tail(1)[0])
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def average_directional_movement_index(n, n_ADX):
@@ -205,7 +206,7 @@ def average_directional_movement_index(n, n_ADX):
                 pass
     except:
         # print(traceback.format_exc())
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())
 
 
 def rsi(n):
@@ -248,4 +249,4 @@ def rsi(n):
         else:
             abObj.fast_min_pd_DF._set_value(abObj.fast_min_pd_DF.tail(1).index, 'RSI', RSI.tail(1).values[0])
     except:
-        logger.error(traceback.format_exc())
+        abObj.log.error(traceback.format_exc())

@@ -1,27 +1,26 @@
-import os
 import datetime
+import os
+
 import time
-os.environ['TZ'] = 'Asia/Kolkata'
-time.tzset()
+import pytz
+# os.environ['TZ'] = 'Asia/Kolkata'
+# time.tzset()
+# tz = pytz.timezone('Asia/Kolkata')
+
 import os
 import traceback
 import argparse
 import sys
-import pandas as pd
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from kafka import KafkaConsumer
-from json import loads
 import pandas as pd
 from src.loghandler import log
 from src.main.algo_agent_object import AlgoAgentObjects as agentObj
 from src.commonlib.firebase_utils import FireBaseUtils
 from src.pandaframe.prev_indicators import prevIndicators
 from src.indicators.indicators import Indicators
-
-logger = log.setup_custom_logger('AlgoAgent')
-
-
-
+from json import loads
+logger=None
 class ConsumerAgent(object):
 
     ohlc_consumer = None
@@ -31,6 +30,7 @@ class ConsumerAgent(object):
     tick_df = None
 
     def __init__(self, args_topic, args_kafkadetails, args_symbol, args_marketdate, arg_prevdate):
+        agentObj.log = log.setup_custom_logger(args_topic)
         agentObj.topic = args_topic
         agentObj.kafka = args_kafkadetails
         agentObj.market_date = args_marketdate
@@ -38,12 +38,12 @@ class ConsumerAgent(object):
         agentObj.prev_market_date = arg_prevdate
         self.exit_algo = datetime.datetime.strptime(agentObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
         self.exit_algo_315pm = time.mktime(self.exit_algo.timetuple())
+        # Converting time to GMT + 5:30
+        self.exit_algo_315pm = self.exit_algo_315pm
         self.tick_df = pd.DataFrame(None, columns=['Timestamp', 'Price'])
-        self.ohlc_consumer = KafkaConsumer(str(agentObj.topic),
-                      bootstrap_servers=[str(agentObj.kafka)],
+        self.ohlc_consumer = KafkaConsumer(bootstrap_servers=['localhost:9092'],
                       auto_offset_reset='earliest',
                       enable_auto_commit=True,
-                      group_id='agent',
                       value_deserializer=lambda x: loads(x.decode('utf-8')))
 
     def export_dataframe(self, message):
@@ -56,14 +56,17 @@ class ConsumerAgent(object):
             self.tick_df.to_csv(os.path.join(dfs_path, agentObj.symbol + "_ticks.csv"), header=True)
             sys.exit()
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
             sys.exit()
 
     def startlisten(self):
         indicator_obj = Indicators()
-        logger.info("Algo Agent Strated Listening ticks for " + agentObj.symbol + ", Topic Id:"+agentObj.topic)
+        agentObj.log.info("Algo Agent Started Listening ticks for " + agentObj.symbol + ", Topic Id:"+agentObj.topic)
+        print("In Liostening")
+        self.ohlc_consumer.subscribe([str(agentObj.topic)])
         try:
             for message in self.ohlc_consumer:
+                # print(message.value)
                 message = message.value
                 if (message.get('Timestamp') is not None) and (message.get('Price') is not None):
                     self.tick_df.loc[len(self.tick_df)] = [message.get('Timestamp'), message.get('Price')]
@@ -72,14 +75,14 @@ class ConsumerAgent(object):
                     else:
                         self.export_dataframe(message)
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def loadDFs_with_prev_data(self, date, symbol, contract_type="STK"):
         try:
-            logger.info("Trying to get previous day bar data from firebase")
+            agentObj.log.info("Trying to get previous day bar data from firebase")
             fbobj = FireBaseUtils()
             csv_path = fbobj.get_file_from_firebaseStorage(fbobj.get_blob_path(date,symbol,contract_type))
-            logger.info("CSV downloaded from firebase and saved in "+csv_path)
+            agentObj.log.info("CSV downloaded from firebase and saved in "+csv_path)
             data = pd.read_csv(csv_path)
             data['time'] = pd.to_datetime(data['time'], unit='s', utc=True)
             data = data.set_index('time')
@@ -87,34 +90,34 @@ class ConsumerAgent(object):
             ti = data.loc[:, ['price']]
             agentObj.fast_min_pd_DF = ti.price.resample(str(agentObj.fast_min) + 'min').ohlc()
             agentObj.slow_min_pd_DF = ti.price.resample(str(agentObj.slow_min) + 'min').ohlc()
-            logger.info("Panda dataframe resampled for fast and slow prev day data")
+            agentObj.log.info("Panda dataframe resampled for fast and slow prev day data")
             pindi = prevIndicators()
-            logger.info("Generating indicators for data frames")
+            agentObj.log.info("Generating indicators for data frames")
             pindi.generate_indicator_serious()
-            logger.info("All indicators gensrated sucessfull for previous day data")
-            logger.info("**Fast dataframe with indicators")
+            agentObj.log.info("All indicators gensrated sucessfull for previous day data")
+            agentObj.log.info("**Fast dataframe with indicators")
             agentObj.fast_min_pd_DF = agentObj.fast_min_pd_DF[:-1]
-            logger.info(agentObj.fast_min_pd_DF)
-            logger.info("**Fast dataframe with indicators")
+            agentObj.log.info(agentObj.fast_min_pd_DF)
+            agentObj.log.info("**Fast dataframe with indicators")
             agentObj.slow_min_pd_DF = agentObj.slow_min_pd_DF[:-1]
-            logger.info(agentObj.slow_min_pd_DF)
+            agentObj.log.info(agentObj.slow_min_pd_DF)
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
 
     def startAgentEngine(self):
         try:
-            logger.info("Algo Agent Preparing to Start")
+            agentObj.log.info("Algo Agent Preparing to Start")
             self.loadDFs_with_prev_data(agentObj.prev_market_date, agentObj.symbol, "STK")
             self.startlisten()
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
 
 def cmd_param_handlers():
     try:
-        logger.info("Tick Algo Agent - command param handlers")
+        # agentObj.log.info("Tick Algo Agent - command param handlers")
         cmdLineParser = argparse.ArgumentParser("Tick Algo Agent :")
         cmdLineParser.add_argument("-k", "--kafka", action="store", type=str, dest="kafka",
                                    default="127.0.0.1:9092", help="Kafka server IP eg: 127.0.0.1:9092")
@@ -127,7 +130,6 @@ def cmd_param_handlers():
         cmdLineParser.add_argument("-s", "--symbol", action="store", type=str, dest="symbol",
                                    default="ADANIPORT", help="IB Symbol eg: INFY")
         args = cmdLineParser.parse_args()
-
         consObj = ConsumerAgent(args_topic=str(args.topic),
                                 args_kafkadetails=str(args.kafka),
                                 args_symbol=str(args.symbol),
@@ -137,23 +139,32 @@ def cmd_param_handlers():
 
 
     except Exception as ex:
-        logger.error(traceback.format_exc())
-        logger.error(ex)
+        agentObj.log.error(traceback.format_exc())
+        agentObj.log.error(ex)
 
 
 
 if __name__ == '__main__':
-    logger.info("** Algo Agent Initiated Succesfully")
-    cmd_param_handlers()
+    # agentObj.log.info("** Algo Agent Initiated Succesfully")
+    # cmd_param_handlers()
 
     # Below commands to execute individually
-    # consobj = ConsumerAgent(
-    #     args_topic=str("HRHD"),
-    #     args_kafkadetails=str("127.0.0.1:9092"),
-    #     args_symbol=str("TCS"),
-    #     args_marketdate=str("20200117"),
-    #     arg_prevdate=str("20200116")
-    # )
-    # logger.info("Base parameters initialized")
-    # consobj.startAgentEngine()
+    consobj = ConsumerAgent(
+        args_topic=str("ADANIPORT"),
+        args_kafkadetails=str("localhost:9092"),
+        args_symbol=str("ADANIPORT"),
+        args_marketdate=str("20200417"),
+        arg_prevdate=str("20200416")
+    )
+    consobj.startAgentEngine()
 
+    # ohlc_consumer = KafkaConsumer('ADANIPORT',
+    #                                    bootstrap_servers=['localhost:9092'],
+    #                                    auto_offset_reset='earliest',
+    #                                    enable_auto_commit=True,
+    #                                    value_deserializer=lambda x: loads(x.decode('utf-8')))
+    # try:
+    #     for message in ohlc_consumer:
+    #         print(message.value)
+    # except Exception as ex:
+    #     print(ex)

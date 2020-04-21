@@ -1,6 +1,8 @@
-from configparser import ConfigParser
 import os
+from configparser import ConfigParser
+
 import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import pandas as pd
 
@@ -10,6 +12,7 @@ class AlgoAgentObjects:
     parser = ConfigParser()
     os.environ['TICKALGOAGENT_CONFIG'] = os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")]+'/config/config.ini'
     parser.read(os.getenv("TICKALGOAGENT_CONFIG"))
+    log = None
     # indicator_thread = None
     # hrhd_thread = None
     # sapm_thread = None

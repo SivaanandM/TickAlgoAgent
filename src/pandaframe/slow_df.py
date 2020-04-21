@@ -1,15 +1,17 @@
-import sys,os
+import os
+import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 from src.pandaframe import slow_indicators as indi_obj
-from src.loghandler import log
+# from src.loghandler import log
 import traceback
 import time
-os.environ['TZ'] = 'Asia/Kolkata'
-time.tzset()
+# os.environ['TZ'] = 'Asia/Kolkata'
+# time.tzset()
 import pandas as pd
 
-logger = log.setup_custom_logger('AlgoAgent')
+# logger = abObj.log
 
 
 class SlowDF(object):
@@ -34,7 +36,7 @@ class SlowDF(object):
                 indi_obj.load_indicators()
             except:
                 # print(traceback.format_exc())
-                logger.error(traceback.format_exc())
+                abObj.log.error(traceback.format_exc())
         tick_time = ticks.get('Timestamp')
         tick_price = ticks.get('Price')
         try:
@@ -58,7 +60,7 @@ class SlowDF(object):
 
         except:
             # print(traceback.format_exc())
-            logger.error(traceback.format_exc())
+            abObj.log.error(traceback.format_exc())
 
 
 

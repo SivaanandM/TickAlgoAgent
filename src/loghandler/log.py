@@ -1,6 +1,8 @@
 import logging
 import os
+
 import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import shutil
 import traceback
@@ -25,7 +27,7 @@ def setup_custom_logger(name):
             log_level = logging.WARN
         else:
             log_level = logging.INFO
-        logfile = agentObj.parser.get('common', 'log_path')+os.sep+"algo_agent.log"
+        logfile = agentObj.parser.get('common', 'log_path')+os.sep+name+".log"
         handler = logging.FileHandler(logfile)
         handler.setFormatter(formatter)
         logger = logging.getLogger(name)

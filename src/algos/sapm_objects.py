@@ -1,4 +1,6 @@
-import sys,os
+import os
+import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 

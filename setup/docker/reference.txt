@@ -1,0 +1,24 @@
+https://medium.com/better-programming/kafka-docker-run-multiple-kafka-brokers-and-zookeeper-services-in-docker-3ab287056fd5
+
+## This example we are using
+https://github.com/simplesteph/kafka-stack-docker-compose/blob/master/zk-single-kafka-single.yml
+Commands
+
+# Bring up from compose yml
+docker-compose -f kafka.yaml up -d
+
+# docker execute command
+docker exec -it 22c7daccf11e bash
+
+
+docker rm $(docker ps -a -q)
+
+
+docker-compose up --no-start
+docker-compose start zookeeper-1
+docker-compose start zookeeper-2
+docker-compose start zookeeper-3
+
+docker-compose run -d --service-ports kafka-1
+docker-compose run -d --service-ports kafka-2
+docker-compose run -d --service-ports kafka-3

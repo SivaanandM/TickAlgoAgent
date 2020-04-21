@@ -1,15 +1,13 @@
-
-import logging
-import pandas as pd
-import numpy as np
 import sys,os
+import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as agentObj
-from src.loghandler import log
+# from src.loghandler import log
 import pandas as pd
 import traceback
 
-logger = log.setup_custom_logger('AlgoAgent')
+# logger = agentObj.log
 
 class prevIndicators(object):
 
@@ -33,7 +31,7 @@ class prevIndicators(object):
             agentObj.slow_min_pd_DF = agentObj.slow_min_pd_DF.join(SEMA)
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def macd(self):
         try:
@@ -60,7 +58,7 @@ class prevIndicators(object):
             agentObj.slow_min_pd_DF = agentObj.slow_min_pd_DF.join(SMACDdiff)
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def average_directional_movement_index_fastDF(self):
         try:
@@ -105,7 +103,7 @@ class prevIndicators(object):
             agentObj.fast_min_pd_DF['NegDI'] = NegDI.tolist()
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def average_directional_movement_index_slowDF(self):
         try:
@@ -149,7 +147,7 @@ class prevIndicators(object):
             agentObj.slow_min_pd_DF['PosDI'] = PosDI.tolist()
             agentObj.slow_min_pd_DF['NegDI'] = NegDI.tolist()
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def relative_strength_index_fastDF(self):
         try:
@@ -179,7 +177,7 @@ class prevIndicators(object):
             RSI = pd.Series(PosDI / (PosDI + NegDI), name='RSI')
             agentObj.fast_min_pd_DF['RSI'] = RSI.tolist()
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def relative_strength_index_slowDF(self):
         try:
@@ -211,7 +209,7 @@ class prevIndicators(object):
             RSI = pd.Series(PosDI / (PosDI + NegDI), name='RSI')
             agentObj.slow_min_pd_DF['RSI'] = RSI.tolist()
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
 
     def generate_indicator_serious(self):
@@ -225,4 +223,4 @@ class prevIndicators(object):
             self.relative_strength_index_slowDF()
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())

@@ -1,13 +1,15 @@
-import sys,os
+import os
+import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import traceback
-from src.loghandler import log
 from concurrent.futures import ThreadPoolExecutor
+from src.main.algo_agent_object import AlgoAgentObjects as agentObj
 from src.pandaframe.slow_df import SlowDF as SLDF
 from src.pandaframe.fast_df import FastDF as FADF
 from src.algos.sapm import Sapm as Sapm
 
-logger = log.setup_custom_logger('AlgoAgent')
+logger = agentObj.log
 
 
 
@@ -34,7 +36,7 @@ class Indicators(object):
 
         except:
             # print(traceback.format_exc())
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
 
 if __name__ == '__main__':

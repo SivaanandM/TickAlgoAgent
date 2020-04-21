@@ -1,33 +1,30 @@
 
 import os
-import time
+
 import sys
+
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
-
-from src.loghandler import log
 from src.main.algo_agent_object import AlgoAgentObjects as algoObj
 
-logger = log.setup_custom_logger('AlgoAgent')
 
 
 class FireBaseUtils(object):
     cred = None
     bucket = None
-
     def __init__(self):
         try:
-            logger.info("Initiating connection to fire base")
+            algoObj.log.info("Initiating connection to fire base")
             FireBaseUtils.cred = credentials.Certificate(algoObj.get_with_base_path("firebase", "firebase_key"))
             firebase_admin.initialize_app(FireBaseUtils.cred, {
                 'storageBucket': algoObj.get_value('firebase', 'firebase_app_name')
             })
-            logger.info("Connected to firebase bucket")
+            algoObj.log.info("Connected to firebase bucket")
             FireBaseUtils.bucket = storage.bucket()
         except Exception as ex:
-            logger.error(ex)
+            algoObj.log.error(ex)
 
 
     def get_file_from_firebaseStorage(self, path):
@@ -36,11 +33,11 @@ class FireBaseUtils(object):
             blob = FireBaseUtils.bucket.blob(path)
             print('Blobs: {}'.format(blob.name))
             blob.download_to_filename(os.path.join("/","tmp",blob.name.split('/')[1]))
-            logger.info('Blob {} downloaded to {}.'.format(
+            algoObj.log.info('Blob {} downloaded to {}.'.format(
                 path, "/tmp/"+ blob.name.split('/')[1]))
             return os.path.join("/","tmp",blob.name.split('/')[1])
         except Exception as ex:
-            logger.error(ex)
+            algoObj.log.error(ex)
 
     def get_blob_path(self, date, symbol, contract_type="STK"):
         if contract_type is "STK":
@@ -54,11 +51,11 @@ class FireBaseUtils(object):
                         print("Uploading file @" + os.path.join(r, file))
                         blob = FireBaseUtils.bucket.blob(date + "/" + file)
                         blob.upload_from_filename(os.path.join(r, file))
-                        logger.info('File {} uploaded to {}.'.format(
+                        algoObj.log.info('File {} uploaded to {}.'.format(
                             os.path.join(r, file),
                             date + "/" + file))
         except Exception as ex:
-            logger.error(ex)
+            algoObj.log.error(ex)
 
 
 if __name__ == '__main__':
