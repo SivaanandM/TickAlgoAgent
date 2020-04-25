@@ -23,7 +23,7 @@ class AlgoAgentObjects:
     symbol = ""
     market_date = ""
     prev_market_date = ""
-
+    backtest = None
     # all below used in fast min data frame
     fast_min_ticks = []
     fast_min = int(parser.get('dataframes', 'fast_df'))

@@ -1,15 +1,30 @@
 import os
 import sys
-
+from configparser import ConfigParser
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
 
 
-class SapmObjects():
+
+
+class SapmObjects:
+
+    os.environ['SAPM_CONFIG'] = os.getcwd()[:os.getcwd().find("TickAlgoAgent") + len(
+        "TickAlgoAgent")] + '/config/sapm.ini'
+
+    # @staticmethod
+    def check_get_sapm_config(strkey):
+        parser = ConfigParser()
+        parser.read(os.getenv("SAPM_CONFIG"))
+        ispresent = parser.has_option(abObj.topic, strkey)
+        if ispresent:
+            return parser.get(abObj.topic, strkey)
+        else:
+            return parser.get('sapm', strkey)
 
     SYMBOL = abObj.symbol
-    TI = int(abObj.parser.get('sapm', 'TI'))
-    DTH = float(abObj.parser.get('sapm', 'DTH'))
+    TI = int(check_get_sapm_config('TI'))
+    DTH = float(check_get_sapm_config('DTH'))
     TSL = 0.0 #float(abObj.parser.get('sapm', 'TSL'))
     SL = 0.0 #float(abObj.parser.get('sapm', 'SL'))
     titicks = []

@@ -1,7 +1,7 @@
 import os
 
 import sys
-
+from datetime import timezone
 sys.path.append(os.getcwd()[:os.getcwd().find("TickAlgoAgent")+len("TickAlgoAgent")])
 from src.algos.sapm_objects import SapmObjects as so
 from src.main.algo_agent_object import AlgoAgentObjects as abObj
@@ -19,19 +19,37 @@ class Sapm(object):
     exit_algo_325pm = None
 
     def __init__(self):
-        self.entime = datetime.datetime.strptime(abObj.market_date + ' 09:20:00', '%Y%m%d %H:%M:%S')
-        self.ent930am = time.mktime(self.entime.timetuple())
-        self.extime = datetime.datetime.strptime(abObj.market_date + ' 15:10:00', '%Y%m%d %H:%M:%S')
-        self.exit320pm = time.mktime(self.extime.timetuple())
-        print("test")
+        if abObj.backtest is False:
+            self.entime = datetime.datetime.strptime(abObj.market_date + ' 04:00:00', '%Y%m%d %H:%M:%S')
+            self.ent930am = self.entime.timestamp()
+            # time.mktime(self.entime.timetuple())
+            self.extime = datetime.datetime.strptime(abObj.market_date + ' 09:40:00', '%Y%m%d %H:%M:%S')
+            self.exit320pm = self.extime.timestamp()
+            # time.mktime(self.extime.timetuple()) # self.extime.replace(tzinfo=timezone.utc)
+            print("test")
+        else:
+            self.entime = datetime.datetime.strptime(abObj.market_date + ' 09:30:00', '%Y%m%d %H:%M:%S')
+            self.ent930am = self.entime.timestamp()
+            # time.mktime(self.entime.timetuple())
+            self.extime = datetime.datetime.strptime(abObj.market_date + ' 15:10:00', '%Y%m%d %H:%M:%S')
+            self.exit320pm = self.extime.timestamp()
+            # time.mktime(self.extime.timetuple()) # self.extime.replace(tzinfo=timezone.utc)
+            print("test")
 
+    def time_converter(self, utc_ticktime):
+        # time.localtime(int(ticktime))))
+        if abObj.backtest is False:
+            print("UTC_Tick : " + str(utc_ticktime))
+            return time.localtime(int(utc_ticktime + 19800))
+        else:
+            return time.localtime(int(utc_ticktime))
 
     def do_samp(self, ticks):
         if abObj.start_sapm is True:
             self.algo(float(ticks.get('Timestamp')), float(ticks.get('Price')))
             if so.SL == 0.0:
-                so.SL = round(ticks.get('Price') * (float(abObj.parser.get('sapm', 'SL')) / 100), 1)
-                so.TSL = round(ticks.get('Price') * (float(abObj.parser.get('sapm', 'TSL')) / 100), 1)
+                so.SL = round(ticks.get('Price') * (float(so.check_get_sapm_config('SL')) / 100), 1)
+                so.TSL = round(ticks.get('Price') * (float(so.check_get_sapm_config('TSL')) / 100), 1)
                 print("STOP LOSS", str(so.SL), " TRAILING STOP LOSS", so.TSL)
 
     def algo(self, ticktime, tickprice):
@@ -39,7 +57,7 @@ class Sapm(object):
             if ticktime > self.exit320pm:
                 if so.LBuy_Position is True:
                     print("*** LONG EXIT ," + str(
-                        time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(tickprice))
+                        time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(tickprice))
                     print("LONG position :" + str(tickprice - so.LB_Price))
                     so.net_profit.append(tickprice - so.LB_Price)
                     so.LBuy_Position = False
@@ -49,7 +67,7 @@ class Sapm(object):
                     print("Number of TRADES :" + str(so.No_Trades))
                 if so.SSell_Position is True:
                     print("*** SHORT EXIT ," + str(
-                        time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(tickprice))
+                        time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(tickprice))
                     print("SHORT position :" + str(so.SS_Price - tickprice))
                     so.net_profit.append(so.SS_Price - tickprice)
                     so.SSell_Position = False
@@ -64,7 +82,7 @@ class Sapm(object):
                     (abObj.slow_min_pd_DF.loc[abObj.slow_min_pd_DF.index[-1]]['ADX']
                      < abObj.slow_min_pd_DF.loc[abObj.slow_min_pd_DF.index[len(abObj.slow_min_pd_DF) - 2]]['ADX']):
                     print(
-                        "* LONG EXIT ," + str(time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(
+                        "* LONG EXIT ," + str(time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(
                             tickprice))
                     print("LONG position :" + str(tickprice - so.LB_Price))
                     so.net_profit.append(tickprice - so.LB_Price)
@@ -80,7 +98,7 @@ class Sapm(object):
                     (abObj.slow_min_pd_DF.loc[abObj.slow_min_pd_DF.index[-1]]['ADX']
                      < abObj.slow_min_pd_DF.loc[abObj.slow_min_pd_DF.index[len(abObj.slow_min_pd_DF) - 2]]['ADX']):
                     print(
-                        "* SHORT EXIT ," + str(time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(
+                        "* SHORT EXIT ," + str(time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(
                             tickprice))
                     print("SHORT position :" + str(so.SS_Price - tickprice))
                     so.net_profit.append(so.SS_Price - tickprice)
@@ -112,7 +130,7 @@ class Sapm(object):
                                     and abObj.long_flags['SL_ADX'] == 1 and abObj.long_flags['SL_MACD'] == 1\
                                     and so.LBuy_Position is False:
                                 print("LONG ENTRY ," + str(
-                                    time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(tickprice))
+                                    time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(tickprice))
                                 so.LB_Price = tickprice
                                 so.LBuy_Position = True
                                 so.LSL_Price = tickprice - so.SL
@@ -126,7 +144,7 @@ class Sapm(object):
                                     and abObj.short_flags['SL_ADX'] == 1 and abObj.short_flags['SL_MACD'] == 1\
                                     and so.SSell_Position is False:
                                 print("SHORT ENTRY ," + str(
-                                    time.strftime("%D %H:%M:%S", time.localtime(int(ticktime)))) + "," + str(tickprice))
+                                    time.strftime("%D %H:%M:%S", self.time_converter(int(ticktime)))) + "," + str(tickprice))
                                 so.SS_Price = tickprice
                                 so.SSell_Position = True
                                 so.SSL_Price = tickprice + so.SL

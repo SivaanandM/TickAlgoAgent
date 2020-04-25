@@ -1,9 +1,9 @@
 import datetime
 import os
-
+from datetime import timezone
 import time
 import pytz
-# os.environ['TZ'] = 'Asia/Kolkata'
+
 # time.tzset()
 # tz = pytz.timezone('Asia/Kolkata')
 
@@ -36,10 +36,12 @@ class ConsumerAgent(object):
         agentObj.market_date = args_marketdate
         agentObj.symbol = args_symbol
         agentObj.prev_market_date = arg_prevdate
-        self.exit_algo = datetime.datetime.strptime(agentObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
-        self.exit_algo_315pm = time.mktime(self.exit_algo.timetuple())
-        # Converting time to GMT + 5:30
-        self.exit_algo_315pm = self.exit_algo_315pm
+        if agentObj.backtest is False:
+            self.exit_algo = datetime.datetime.strptime(agentObj.market_date + ' 09:45:00', '%Y%m%d %H:%M:%S')
+            self.exit_algo_315pm = self.exit_algo.timestamp()
+        else:
+            self.exit_algo = datetime.datetime.strptime(agentObj.market_date + ' 15:15:00', '%Y%m%d %H:%M:%S')
+            self.exit_algo_315pm = self.exit_algo.timestamp()
         self.tick_df = pd.DataFrame(None, columns=['Timestamp', 'Price'])
         self.ohlc_consumer = KafkaConsumer(bootstrap_servers=['localhost:9092'],
                       auto_offset_reset='earliest',
@@ -122,14 +124,18 @@ def cmd_param_handlers():
         cmdLineParser.add_argument("-k", "--kafka", action="store", type=str, dest="kafka",
                                    default="127.0.0.1:9092", help="Kafka server IP eg: 127.0.0.1:9092")
         cmdLineParser.add_argument("-t", "--topic", action="store", type=str, dest="topic",
-                                   default="ADANIPORT", help="Kafka Producer Topic Name eg: 0")
+                                   default="CIPLA", help="Kafka Producer Topic Name eg: 0")
         cmdLineParser.add_argument("-md", "--marketdate", action="store", type=str, dest="marketdate",
-                                   default="20191031", help="Market Date eg: 20191025")
+                                   default="20200424", help="Market Date eg: 20191025")
         cmdLineParser.add_argument("-pd", "--prevdate", action="store", type=str, dest="prevdate",
-                                   default="20191030", help="Previous Market date eg: 20191025")
+                                   default="20200423", help="Previous Market date eg: 20191025")
         cmdLineParser.add_argument("-s", "--symbol", action="store", type=str, dest="symbol",
-                                   default="ADANIPORT", help="IB Symbol eg: INFY")
+                                   default="CIPLA", help="IB Symbol eg: INFY")
+        cmdLineParser.add_argument("-bs", "--backtest", action="store", type=bool, dest="backtest",
+                                   default=True, help="Back Test eg : True or False")
+
         args = cmdLineParser.parse_args()
+        agentObj.backtest = bool(args.backtest)
         consObj = ConsumerAgent(args_topic=str(args.topic),
                                 args_kafkadetails=str(args.kafka),
                                 args_symbol=str(args.symbol),
@@ -146,25 +152,14 @@ def cmd_param_handlers():
 
 if __name__ == '__main__':
     # agentObj.log.info("** Algo Agent Initiated Succesfully")
-    # cmd_param_handlers()
+    cmd_param_handlers()
 
-    # Below commands to execute individually
-    consobj = ConsumerAgent(
-        args_topic=str("ADANIPORT"),
-        args_kafkadetails=str("localhost:9092"),
-        args_symbol=str("ADANIPORT"),
-        args_marketdate=str("20200417"),
-        arg_prevdate=str("20200416")
-    )
-    consobj.startAgentEngine()
-
-    # ohlc_consumer = KafkaConsumer('ADANIPORT',
-    #                                    bootstrap_servers=['localhost:9092'],
-    #                                    auto_offset_reset='earliest',
-    #                                    enable_auto_commit=True,
-    #                                    value_deserializer=lambda x: loads(x.decode('utf-8')))
-    # try:
-    #     for message in ohlc_consumer:
-    #         print(message.value)
-    # except Exception as ex:
-    #     print(ex)
+    # # Below commands to execute individually
+    # consobj = ConsumerAgent(
+    #     args_topic=str("ADANIPORT"),
+    #     args_kafkadetails=str("localhost:9092"),
+    #     args_symbol=str("ADANIPORT"),
+    #     args_marketdate=str("20200417"),
+    #     arg_prevdate=str("20200416")
+    # )
+    # consobj.startAgentEngine()
