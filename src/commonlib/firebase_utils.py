@@ -40,7 +40,7 @@ class FireBaseUtils(object):
             algoObj.log.error(ex)
 
     def get_blob_path(self, date, symbol, contract_type="STK"):
-        if contract_type is "STK":
+        if contract_type == "STK":
             return os.path.join(date,symbol+"_STK.csv")
 
     def upload_all_file_in_dir_to_firebaseStorage(self, dir_path, date):

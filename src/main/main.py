@@ -131,7 +131,7 @@ def cmd_param_handlers():
                                    default="20200423", help="Previous Market date eg: 20191025")
         cmdLineParser.add_argument("-s", "--symbol", action="store", type=str, dest="symbol",
                                    default="CIPLA", help="IB Symbol eg: INFY")
-        cmdLineParser.add_argument("-bs", "--backtest", action="store", type=bool, dest="backtest",
+        cmdLineParser.add_argument("-bt", "--backtest", action="store", type=bool, dest="backtest",
                                    default=True, help="Back Test eg : True or False")
 
         args = cmdLineParser.parse_args()

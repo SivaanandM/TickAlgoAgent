@@ -1,0 +1,16 @@
+FROM ubuntu:20.04
+RUN apt -y update
+RUN apt -y install python3 &&\
+    apt -y install python3-pip &&\
+    apt -y install git
+RUN git clone https://github.com/SivaanandM/TickAlgoAgent.git
+ENV kafka=127.0.0.1:9092
+ENV topic=INFY
+ENV marketdate=20200424
+ENV prevdata=20200423
+ENV SYMBOL=INFY
+ENV backtext=True
+WORKDIR /TickAlgoAgent/src/main
+RUN pip3 install -r ../../setup/requirements.txt
+CMD ["python3", "main.py", "-k ${kafka} -t ${topic} -md ${marketdate} -pd ${prevdata} -s ${symbol} -bt ${backtest}"]
+

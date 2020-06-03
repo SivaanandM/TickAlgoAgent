@@ -20,7 +20,7 @@ class prevIndicators(object):
             agentObj.slow_min_pd_DF = agentObj.slow_min_pd_DF.join(SMA)
 
         except Exception as ex:
-            logger.error(traceback.format_exc())
+            agentObj.log.error(traceback.format_exc())
 
     def exponential_moving_average(dself):
         try:
